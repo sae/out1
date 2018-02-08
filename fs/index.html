@@ -1,0 +1,34 @@
+<html>
+<head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+</head>
+<body>
+  <div id="name">Therm1</div>
+  <div id="d">-</div>
+  <div id="th">
+  	<span id="t">X</span>C
+  	<span id="h">X</span>%
+  </div>
+  <script>
+  function get() {	  
+  $.ajax({
+    url: '/rpc/t',
+    success: function(data) {
+      $('#t').text(data);
+    },
+  });
+  $.ajax({
+    url: '/rpc/h',
+    success: function(data) {
+      $('#h').text(data);
+    },
+  });
+  var d = new Date();
+  $('#d').text(d.toLocaleTimeString());
+  }
+	get();
+	setInterval(get, 5000);
+  </script>
+  
+</body>
+</html>
