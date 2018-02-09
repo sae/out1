@@ -1,3 +1,6 @@
+/**
+ * based on am2320-dht firmware (mjs+dht)
+ * */
 load('api_config.js');
 load('api_gpio.js');
 load('api_mqtt.js');
@@ -42,7 +45,8 @@ RPC.addHandler('h', function(args) {
 let mov_pin = 14; //movement sensor pin
 let led_tape=5; //light control pin
 let mvm=0; //movement detected
-let led_tape_disabled=0; //disable led light (if day f/ex)
+let led_tape_disabled=0; //disable led if light sensor ON
+let led_mode=0; //<0 0 >0 for OFF/by sensor/ON
 
 GPIO.set_mode(mov_pin, GPIO.MODE_INPUT);
 GPIO.set_pull(mov_pin, GPIO.PULL_NONE); //no pull down in esp8266
@@ -51,6 +55,7 @@ GPIO.write(led_tape,0);
 //by timer, not by interrupt, so we can make some time-based handling: delay or slow dimming if use pwm
 Timer.set(500 , true , function() {
   mvm=GPIO.read(mov_pin);
+  if (led_mode!==0) return;
   if(mvm===1 && led_tape_disabled===0) {  
     GPIO.write(led_tape,1);
   } else {
@@ -59,11 +64,16 @@ Timer.set(500 , true , function() {
 }, null);
 
 RPC.addHandler('mvm', function(args) {
-    //handle request { "disable":"1" }
-    if (typeof(args) === 'object' && typeof(args.disable) === 'number') {
-      led_tape_disabled=args.disable;
-    }
     return mvm;
+});
+
+RPC.addHandler('led', function(args) {
+    if (typeof(args) === 'object' && typeof(args.mode) === 'number') {
+      led_mode=args.mode;
+      if (led_mode>0) GPIO.write(led_tape,1);
+      if (led_mode<0) GPIO.write(led_tape,0);
+    }
+    return led_mode;
 });
 
 /**

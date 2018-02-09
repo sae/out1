@@ -3,11 +3,20 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
 </head>
 <body>
-  <div id="name">Therm1</div>
+  <div id="name">out1</div>
   <div id="d">-</div>
   <div id="th">
   	<span id="t">X</span>C
   	<span id="h">X</span>%
+  </div>
+  <div id="panel1">
+  	<div>Mode:<span id="led">?</span></div>
+  	<div>Movement:<span id="mvm">?</span></div>
+  </div>
+  <div id="panel2">
+  	<button id="on">ON</button>
+  	<button id="default">Default</button>
+  	<button id="off">OFF</button>
   </div>
   <script>
   function get() {	  
@@ -23,11 +32,61 @@
       $('#h').text(data);
     },
   });
+  $.ajax({
+    url: '/rpc/led',
+    success: function(data) {
+      $('#led').text(data);
+    },
+  });
+  $.ajax({
+    url: '/rpc/mvm',
+    success: function(data) {
+      $('#mvm').text(data);
+    },
+  });
+  
   var d = new Date();
   $('#d').text(d.toLocaleTimeString());
   }
 	get();
 	setInterval(get, 5000);
+
+  $('#on').on('click', function() {
+    $.ajax({
+      url: '/rpc/led',
+      data: '{"mode":1}', //JSON.stringify(payload),
+      type: 'POST',
+      contentType: 'application/json',
+      success: function(data) {
+        $('#led').text(data);
+      },
+    })
+  });
+
+  $('#off').on('click', function() {
+    $.ajax({
+      url: '/rpc/led',
+      data: '{"mode":-1}',
+      type: 'POST',
+      contentType: 'application/json',
+      success: function(data) {
+        $('#led').text(data);
+      },
+    })
+  });
+  
+  $('#default').on('click', function() {
+    $.ajax({
+      url: '/rpc/led',
+      data: '{"mode":0}',
+      type: 'POST',
+      contentType: 'application/json',
+      success: function(data) {
+        $('#led').text(data);
+      },
+    })
+  });
+
   </script>
   
 </body>
